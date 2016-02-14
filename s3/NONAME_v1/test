@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+use Cwd 'abs_path';
+
+print abs_path($0);
