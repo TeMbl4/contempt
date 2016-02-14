@@ -1,0 +1,53 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name="jarvis"
+rcvar=${name}_enable
+jarvis_enable=${jarvis_enable-"NO"}
+pidfile="/var/run/${name}.pid"
+procname="/all/jarvis/bin/server.pl"
+
+start_cmd="jarvis_start"
+stop_cmd="jarvis_stop"
+restart_cmd="jarvis_restart"
+
+jarvis_start()
+{
+	if [ -f $pidfile ];
+	then 
+		echo "Server Jarvis already started..."
+		exit
+	else
+		echo "Starting Jarvis Security System...."
+		`perl /all/jarvis/bin/server.pl &`
+	fi
+}
+
+jarvis_stop()
+{
+	if [ -f $pidfile ];
+	then
+		echo "Stopping Jarvis Security System...."
+		pid=`cat $pidfile`
+		kill $pid
+	else
+		echo "File $pid not found"
+		exit
+	fi
+}
+
+jarvis_restart()
+{
+	if [ -f $pidfile ];
+	then
+		$stop_cmd
+		sleep 1
+		$start_cmd
+	else
+		$start_cmd
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"
