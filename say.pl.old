@@ -1,0 +1,56 @@
+#!/usr/bin/env perl
+
+require Encode;
+
+use URI::Escape;
+use LWP::UserAgent;
+
+our $mp3_data;
+
+
+$sayIt  = $ARGV[0];
+
+if (!defined($sayIt)) {
+	print qq{Sorry you should enter text for speaking\n};
+	exit -1;
+else {
+    sayText($sayIt);
+}
+
+sub sayText
+{
+	my $text = shift;
+
+	print "+OK - Speaking \"$text\"\n";
+
+#	http://translate.google.com/translate_tts?ie=UTF-8&tl=en&q=so+you+might+ban+me&client=tw-ob
+#	http://translate.google.com/translate_tts?ie=UTF-8&tl=ru&q=%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82&client=tw-ob
+#	my $url = "http://translate.google.com/translate_tts?tl=ru&q=".uri_escape_utf8($text);
+	
+	my $url = "http://translate.google.com/translate_tts?tl=ru&q=".uri_escape_utf8($text)."&client=tw-ob";
+#	my $url = "http://translate.google.com/translate_tts?ie=UTF-8&tl=en&q=".uri_escape_utf8($text);
+	print $url."\n";
+	my $ua = LWP::UserAgent->new(
+		agent => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.872.0 Safari/535.2");
+
+	$ua->get($url, ':content_cb' => \&callback);
+
+#	open (MP3, "|padsp splay -M") or die "[err] Can't save: $!\n";
+	open (MP3, "+>/fs/test") or die "[err] Can't save: $!\n";
+		print qq{"data = $mp3_data\n"};
+#		print MP3 $mp3_data;
+	close(MP3);
+
+
+
+	$mp3_data = undef;
+
+	print "+OK - Done!\n";
+	return;
+}
+
+sub callback {
+   my ($data, $response, $protocol) = @_;
+   $mp3_data .= $data; #
+    print $mp3_data;
+}
